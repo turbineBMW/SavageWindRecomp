@@ -221,6 +221,9 @@ static_assert(k_motion_sens[MOTION_SENS_DEFAULT] == 100);
 constexpr int k_damage[] = DAMAGE_CHOICES;  // Accessibility's damage multipliers, %
 constexpr int DAMAGE_DEFAULT = 3;
 static_assert(k_damage[DAMAGE_DEFAULT] == 100);
+constexpr int k_drop[] = DROP_CHOICES;  // Accessibility's drop rates, %
+constexpr int DROP_DEFAULT = 4;
+static_assert(k_drop[DROP_DEFAULT] == 100);
 constexpr int k_fov[] = FOV_CHOICES;  // field of view, % of the game's own
 constexpr int FOV_DEFAULT_INDEX = 3;
 static_assert(k_fov[FOV_DEFAULT_INDEX] == 100);
@@ -1423,6 +1426,26 @@ void build_items(void) {
                            },
                            [](const Item &) { return nearest(k_text_sizes, N(k_text_sizes), (float)g_settings.menu_text_size); },
                            [](const Item &, int x) { g_settings.menu_text_size = k_text_sizes[x]; }, 2));
+    }
+    // Drop rate and Rare drop rate (assists.c rt_drop_roll, rt_drop_rolls): how often each item of a drop table drops,
+    // the rare ones (10% or less in the game's table) apart
+    for (int rare = 0; rare < 2; rare++) {
+        Item it = choice(P_ACCESS, rare ? "Rare drop rate" : "Drop rate",
+                         rare ? "How often enemies drop their rare items, such as gems. Animals, trees and amiibo too. 100% is the game's own."
+                              : "How often enemies drop their common items. Animals, trees and amiibo too. 100% is the game's own.",
+                         [](const Item &) { return N(k_drop); },
+                         [](const Item &, int x) {
+                             static std::string s;
+                             s = pct(k_drop[x]);
+                             return s.c_str();
+                         },
+                         nullptr, nullptr, DROP_DEFAULT);
+        it.arg = rare;
+        it.get = [](const Item &i) {
+            return nearest(k_drop, N(k_drop), i.arg ? g_settings.rare_drop_rate : g_settings.drop_rate);
+        };
+        it.set = [](const Item &i, int x) { (i.arg ? g_settings.rare_drop_rate : g_settings.drop_rate) = k_drop[x]; };
+        v.push_back(it);
     }
 
 }

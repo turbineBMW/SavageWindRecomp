@@ -330,6 +330,19 @@ SITES = [
     # _horse_crash, _horse_look_ahead; Cheats > Sure-footed horse)
     Site('horse_crash', 'code', 'b9403428 7100111f 54000001/ff00001f d10303ff 6d072beb f90053f5 6d0823e9 a9097bfd', 0),
     Site('horse_look_ahead', 'code', 'd105c3ff fd00a3e8 f900affc a914fbfd a9164ff4 910523fd aa0103f4 aa0003f3', 0),
+    # Drop rate and Rare drop rate (tools/patches.py _drop_rolls, _drop_roll, _drop_single). A drop table's roll count:
+    # `ldr w8, [x8, #0x90]` loads its RepeatNumMax
+    Site('drop_rolls', 'code', 'b9409108 6b130108 54000000/ff00001f 90000009/9f00001f 11000514 f9400129/ffc003ff '
+         'f9400120 94000000/fc000000', 0),
+    # a drop table's roll: `fmul s0, s0, s1` makes the roll, 0..100, that the loop after it walks the table's item
+    # probabilities with
+    Site('drop_roll', 'code', '1e210800 6b09017f 1a9f812d 9bac29ae bd4041c1 1e212000 54000004/ff00001f 1e213800', 0),
+    # the function picking one item (drop_pick), and the game's two calls of it for exactly one item (no roll count)
+    Site('drop_pick', 'call', '94000000/fc000000 aa0003e1 d10223a0 d100b3a2 94000000/fc000000 aa1703e0 a9027ff5 '
+         '94000000/fc000000', 0),
+    Site('drop_single_a', 'code', '94000000/fc000000 aa0003e1 d10223a0 d100b3a2 94000000/fc000000 aa1703e0 a9027ff5 '
+         '94000000/fc000000', 0),
+    Site('drop_single_b', 'code', '94000000/fc000000 f9400688 aa0003e1 910013e2 aa1303e0 bd43a500 bd43b501 2d0087e0', 0),
     # the pouch taking arrows off for the player's bow (tools/patches.py _remove_arrows; Accessibility > Infinite arrows)
     Site('pouch_remove_arrows', 'code', 'd101c3ff a9017bfd a9026ffc a90367fa a9045ff8 a90557f6 a9064ff4 910043fd '
          '90000008/9f00001f aa0003f3 f9400108/ffc003ff aa0103e0', 0),
@@ -508,6 +521,7 @@ OPTIONAL_GROUPS = [
     ('stamina_store',),
     ('sprint_cost', 'sprint_press_cost', 'battle_info_field', 'battle_info_b', 'battle_info_c'),  # (Cheats > Free sprint: without them it does nothing)
     ('horse_crash', 'horse_look_ahead'),  # (Cheats > Sure-footed horse: without them it does nothing)
+    ('drop_rolls', 'drop_roll', 'drop_pick', 'drop_single_a', 'drop_single_b'),
     ('tp_gate',),  # (a far teleport of the control endpoint: without it a long jump freezes the world)
     ('item_tick', 'pouch_item_get', 'pouch_mgr'),
     ('horse_cam_lr',),
@@ -731,6 +745,11 @@ KNOWN = {
         'battle_info_c': 0x7001349648,
         'horse_crash': 0x70006b16c4,
         'horse_look_ahead': 0x70006b4218,
+        'drop_rolls': 0x70013ddcac,
+        'drop_roll': 0x70013dd974,
+        'drop_pick': 0x70013dd8c0,
+        'drop_single_a': 0x7000681f78,
+        'drop_single_b': 0x7000706f84,
         'item_tick': 0x7000cc4c3c,
         'pouch_item_get': 0x7000d921bc,
         'pouch_mgr': 0x7001e18570,

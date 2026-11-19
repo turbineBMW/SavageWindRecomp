@@ -44,6 +44,17 @@ your settings.
 | Weapon wear | How fast weapons, bows and shields wear out: Fairy (never), Peter Pan (0.5x), Hylian (1x, the game's own), Hero (1.5x), Master (2x), Legend (2.5x), Dude, are you ok? (3x). |
 | Infinite arrows | Shooting a bow uses up no arrows. You still need one arrow to shoot. |
 | Infinite stamina | The stamina wheel never runs out. |
+| Drop rate | How often enemies drop their common items: 0% to 1000%. 100% is the game's own. |
+| Rare drop rate | How often enemies drop their rare items, such as gems and star fragments: 0% to 1000%. 100% is the game's own. |
+
+Drop rate and Rare drop rate change how many of each item the game's drop tables give. An item the game gives 10%
+or less is a rare one (diamonds, star fragments, rare guts, silver rupees); the others are common. Each rate
+multiplies its own items: at Rare drop rate 300% a diamond a Lynel drops 5% of the time comes three times as often,
+and at Drop rate 300% so do its horns and hooves. Where that would take a table past 100%, as for one that drops
+something every time, the table rolls more times instead, so a Lynel can drop several horns at once (up to 30 rolls
+a drop). One rate never changes the other's items. Below 100%, more rolls drop nothing. Animals, trees and amiibo
+use the same tables, so the settings change their drops too. The few places where the game picks exactly one item
+from a table keep the game's own pick.
 
 ## Cheats tab
 

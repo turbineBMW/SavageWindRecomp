@@ -33,6 +33,8 @@ Settings g_settings = {
     .freecam_sticks = true,
     .damage_taken = 100,
     .damage_dealt = 100,
+    .drop_rate = 100,
+    .rare_drop_rate = 100,
     .colour_vision_strength = COLOUR_VISION_STRENGTH_DEFAULT,
     .weapon_wear = 100,
     .item_multiplier = 1,
@@ -646,6 +648,8 @@ void settings_load(void) {
         else if (!strcmp(key, "toggle_zl")) g_settings.toggle_zl = atoi(val) != 0;
         else if (!strcmp(key, "toggle_zr")) g_settings.toggle_zr = atoi(val) != 0;
         else if (!strcmp(key, "menu_text_size")) g_settings.menu_text_size = atoi(val);
+        else if (!strcmp(key, "drop_rate")) g_settings.drop_rate = atoi(val);  // (percent)
+        else if (!strcmp(key, "rare_drop_rate")) g_settings.rare_drop_rate = atoi(val);
         else if (!strcmp(key, "haze")) {  // (percent; an older ini's 0-50 reads as 75: HAZE_MIN)
             int v = atoi(val);
             g_settings.haze = v < HAZE_MIN ? HAZE_MIN : v > 100 ? 100 : v;
@@ -756,6 +760,8 @@ void settings_load(void) {
     if (g_settings.no_weapon_wear) g_settings.weapon_wear = 0;  // (Unbreakable weapons is Weapon wear's Fairy, 0x)
     if (g_settings.item_multiplier != 2 && g_settings.item_multiplier != 4 && g_settings.item_multiplier != 8)
         g_settings.item_multiplier = 1;
+    g_settings.drop_rate = CLAMP(g_settings.drop_rate, 0, DROP_RATE_MAX);
+    g_settings.rare_drop_rate = CLAMP(g_settings.rare_drop_rate, 0, DROP_RATE_MAX);
 #undef CLAMP
     for (int i = 0; i < 2; i++)
         if (!(g_settings.stick_deadzone[i] >= 0 && g_settings.stick_deadzone[i] <= 0.5f))
@@ -923,6 +929,8 @@ bool settings_save_to(const char *path) {
     fprintf(f, "toggle_zl = %d\n", g_settings.toggle_zl ? 1 : 0);
     fprintf(f, "toggle_zr = %d\n", g_settings.toggle_zr ? 1 : 0);
     fprintf(f, "menu_text_size = %d\n", g_settings.menu_text_size);
+    fprintf(f, "drop_rate = %d\n", g_settings.drop_rate);
+    fprintf(f, "rare_drop_rate = %d\n", g_settings.rare_drop_rate);
     fprintf(f, "haze = %d\n", g_settings.haze);
     fprintf(f, "bloom = %d\n", g_settings.bloom ? 1 : 0);
     fprintf(f, "depth_of_field = %d\n", g_settings.depth_of_field ? 1 : 0);

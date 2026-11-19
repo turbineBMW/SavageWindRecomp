@@ -3,6 +3,7 @@
 // OPTIONAL_GROUPS) goes without it.
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "settings.h"
 
@@ -54,3 +55,84 @@ uint32_t rt_stamina(uint32_t oldv, uint32_t newv) {
 // Infinite arrows: the bow's shot takes its arrows off the pouch through one function, which returns before taking
 // any (tools/patches.py _remove_arrows). One arrow is still needed to shoot.
 int rt_infinite_arrows(void) { return g_settings.infinite_arrows; }
+
+// Drop rate and Rare drop rate (tools/patches.py _drop_rolls, _drop_roll, _drop_single). A drop rolls its table a
+// number of times (RepeatNumMin..RepeatNumMax at random: rt_drop_rolls), and each roll r, 0..100, takes the first item
+// whose probability p, in percent, is more than what is left of r after the ones before it, or nothing when r is past
+// them all. So an item's real chance is the part of 0..100 its p covers in the table's order (drop_share: an item past
+// 100 never drops). Each item's chance is scaled by its own rate, Rare drop rate for the rare ones (p up to
+// RARE_DROP_PCT), Drop rate for the others. Where the scaled chances come to more than 100 (always, above 100%, for a
+// table that drops something every roll), the table rolls m times as often (m = their sum / 100, rounded at random to a
+// whole number of rolls, m times the game's on average) and each roll takes 1/m of every chance: every item drops its
+// own rate times as often, and one rate never changes the other's items. A roll picks an item by those weights and the
+// game is handed a roll in the middle of that item's own range, or past them all.
+// The game also picks exactly one item from a table, with no roll count, in a couple of places (_drop_single): those
+// keep the game's own pick.
+#define RARE_DROP_PCT 10.0f
+#define DROP_ROLLS_MAX 30  // (a drop's rolls, unless the game's own are more)
+static float drop_p(uint64_t items, uint32_t count, uint32_t i) {
+    float p;
+    memcpy(&p, (const void *)(uintptr_t)(items + (uint64_t)(i < count ? i : 0) * 0x48 + 0x40), 4);
+    return p;
+}
+static double drop_share(double before, float p) {
+    return (before + p < 100 ? before + p : 100) - (before < 100 ? before : 100);
+}
+static double drop_scale(float p) {
+    return (p <= RARE_DROP_PCT ? g_settings.rare_drop_rate : g_settings.drop_rate) / 100.0;
+}
+// The sum of a table's scaled chances, percent; -1: the game's own drops (both rates at 100%, an empty table, or a
+// negative or NaN probability)
+static double drop_total(uint64_t items, uint32_t count, uint32_t columns) {
+    if ((g_settings.drop_rate == 100 && g_settings.rare_drop_rate == 100) || !items || !count || !columns) return -1;
+    double t = 0, before = 0;
+    for (uint32_t i = 0; i < columns; i++) {
+        float p = drop_p(items, count, i);
+        if (!(p >= 0)) return -1;
+        t += drop_share(before, p) * drop_scale(p), before += p;
+    }
+    return t;
+}
+
+static __thread int drop_single;  // in one of the game's single picks (rt_drop_single)
+void rt_drop_single(int on) { drop_single += on ? 1 : -1; }
+
+float rt_drop_roll(float r, uint64_t items, uint32_t count, uint32_t columns) {
+    double t = drop_single ? -1 : drop_total(items, count, columns);
+    if (t < 0) return r;
+    double m = t > 100 ? t / 100 : 1, left = r, before = 0;
+    for (uint32_t i = 0; i < columns; i++) {
+        float p = drop_p(items, count, i);
+        double e = drop_share(before, p), w = e * drop_scale(p) / m;
+        if (e > 0 && left < w) return (float)(before + e / 2);
+        left -= w, before += p;
+    }
+    return (float)(before + 1);  // (past every item: nothing)
+}
+
+// 0 <= x < 1 (splitmix64 per thread: the extra rolls' rounding and count need no particular sequence)
+static __thread uint64_t drop_rng;
+static double drop_random(void) {
+    if (!drop_rng) drop_rng = ((uint64_t)(uintptr_t)&drop_rng ^ (uint64_t)time(NULL) << 20) | 1;
+    uint64_t z = (drop_rng += 0x9e3779b97f4a7c15ull);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ull;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebull;
+    return (double)((z ^ (z >> 31)) >> 11) * 0x1p-53;
+}
+
+// A drop table's roll count: table is the game's 0x108-byte table (ColumnNum +0xf0, the items' count +0xf8 and array
+// +0x100), lo and hi its RepeatNumMin and RepeatNumMax. -1: the game's own count (it fits its rolls).
+int64_t rt_drop_rolls(uint64_t table, uint32_t lo, uint32_t hi) {
+    uint64_t items;
+    uint32_t count, columns;
+    memcpy(&items, (const void *)(uintptr_t)(table + 0x100), 8);
+    memcpy(&count, (const void *)(uintptr_t)(table + 0xf8), 4);
+    memcpy(&columns, (const void *)(uintptr_t)(table + 0xf0), 4);
+    double t = drop_total(items, count, columns);
+    if (t <= 100 || (int32_t)lo < 0 || (int32_t)hi < (int32_t)lo) return -1;
+    uint32_t n = lo + (uint32_t)(drop_random() * ((double)hi - lo + 1));
+    double want = n * t / 100;
+    uint32_t k = (uint32_t)want, max = n > DROP_ROLLS_MAX ? n : DROP_ROLLS_MAX;
+    if (drop_random() < want - k) k++;
+    return k < max ? k : max;
+}

@@ -234,6 +234,8 @@ typedef struct {
     bool toggle_zl;          // press ZL once in play to hold shield / focus; press again to release (hle/input.c)
     bool toggle_zr;          // press ZR once in play to draw / hold bow; press again to release (hle/input.c)
     int menu_text_size;      // overlay text scale, percent (80..150, ui/menu.mm)
+    int drop_rate;           // percent of the game's chance of each drop table item above 10% (DROP_CHOICES)
+    int rare_drop_rate;      // the same for the rare ones, 10% or less (DROP_CHOICES)
     int text_language;   // index in g_text_languages (runtime/language.h), 0: the host's
     int voice_language;  // index in g_voice_languages, 0: the text language's voices
     bool save_backups;   // Saves > Back up at each start: a copy of the save folder as the game starts (runtime/save_backup.c)
@@ -274,6 +276,8 @@ const char *settings_file(void);  // savagewind.ini, or SAVAGEWIND_SETTINGS
 #define WEATHER_COUNT 12  // (weather: 0 the game's, 1 no rain, 2 no thunderstorms, 3 + the game's weather type, held)
 extern const char *const g_weather_keys[WEATHER_COUNT];  // (the ini and `weather` names: game, no_rain, ..., sun_shower)
 #define DAMAGE_CHOICES {25, 50, 75, 100, 150, 200, 300, 400}  // (Accessibility's damage multipliers, percent)
+#define DROP_CHOICES {0, 25, 50, 75, 100, 150, 200, 300, 500, 1000}  // (Accessibility's drop rates, percent)
+#define DROP_RATE_MAX 1000
 #define COLOUR_VISION_COUNT 4  // (Accessibility > Colour vision: off, protanopia, deuteranopia, tritanopia)
 extern const char *const g_colour_vision_keys[COLOUR_VISION_COUNT];  // (the ini's names: off, protanopia, ...)
 #define COLOUR_VISION_STRENGTH_DEFAULT 100  // (percent)

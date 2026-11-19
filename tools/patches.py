@@ -1074,6 +1074,46 @@ def _horse_look_ahead(gen, a):
             f'  /* {a:#x}: sub sp, sp, #0x170 (the horse\'s look-ahead: the way clear with Cheats) */')
 
 
+# Accessibility > Drop rate and Rare drop rate (runtime/assists.c rt_drop_rolls, rt_drop_roll, rt_drop_single). A drop
+# table (an enemy's, an animal's, a tree's...) is 0x108 bytes: RepeatNumMin +0x70, RepeatNumMax +0x90, ColumnNum +0xf0,
+# the items' count +0xf8 and array +0x100 (0x48 bytes each, the probability a float at +0x40; 1.9.0 0x70013dd27c parses
+# them). A drop asks for the table's roll count (1.9.0 0x70013ddc60: `ldr w19, [x8, #0x70]`, `ldr w8, [x8, #0x90]`,
+# then RepeatNumMin plus a random 0..Max-Min) and picks one item per roll (drop_pick, 0x70013dd8c0): s0 a random
+# number 0..1, s1 100, `fmul s0, s0, s1` the roll; the first item whose probability, in percent, is more than what is
+# left of the roll (the ones before it taken off) is the drop, and a roll past them all is none.
+
+# The roll count: x8 the table, w19 RepeatNumMin. The runtime's own count goes into both w19 and w8, so the
+# subtraction after makes 0 and the function returns it; -1 leaves the game's RepeatNumMax and random count.
+def _drop_rolls(gen, a):
+    assert _word(gen, a) == 0xb9409108, hex(_word(gen, a))  # ldr w8, [x8, #0x90]
+    return ('{ extern int64_t rt_drop_rolls(uint64_t, uint32_t, uint32_t); uint32_t hi = LD32(c->x[8] + 0x90); '
+            'int64_t n = rt_drop_rolls(c->x[8], (uint32_t)c->x[19], hi); '
+            'if (n < 0) c->x[8] = hi; else c->x[19] = c->x[8] = (uint64_t)n; }'
+            f'  /* {a:#x}: ldr w8, [x8, #0x90] (a drop table\'s roll count: Accessibility) */')
+
+
+# A roll: x10 the table's items, w11 their count, w8 its ColumnNum, the loop's end (an index past the items reads the
+# first, as the loop does). The game's multiply stays (rt_fmul_s: the guest's FP rules); the runtime then makes the
+# roll land in the item its own weights pick, or past them all.
+def _drop_roll(gen, a):
+    assert _word(gen, a) == 0x1e210800, hex(_word(gen, a))  # fmul s0, s0, s1
+    return ('{ extern float rt_drop_roll(float, uint64_t, uint32_t, uint32_t); rt_fmul_s(c, 0, 0, 1); '
+            'union { uint32_t u; float f; } r = { .u = (uint32_t)c->v[0] }; '
+            'float n = rt_drop_roll(r.f, c->x[10], (uint32_t)c->x[11], (uint32_t)c->x[8]); '
+            'if (n != r.f) { r.f = n; c->v[0] = r.u; } }'
+            f'  /* {a:#x}: fmul s0, s0, s1 (a drop table\'s roll: Accessibility) */')
+
+
+# The game's two picks of exactly one item with no roll count (1.9.0 0x7000681f78, 0x7000706f84): the runtime leaves
+# their rolls alone, so a pick that always gives something still does.
+def _drop_single(gen, a):
+    w = _word(gen, a)
+    assert w >> 26 == 0x25, hex(w)  # bl drop_pick
+    assert a + sext(w & 0x03ffffff, 26) * 4 == gen.sites['drop_pick'], hex(a)
+    fn = _fn(gen, 'drop_pick')
+    return (f'{{ extern void rt_drop_single(int); extern void {fn}(Cpu *); rt_drop_single(1); '
+            f'c->x[30] = {a + 4:#x}ull; {fn}(c); rt_drop_single(0); }}'
+            f'  /* {a:#x}: bl {gen.sites["drop_pick"]:#x} (a single pick from a drop table: Accessibility) */')
 # Adding items (runtime/items.c rt_item_tick): at the entry of Link's damage handling (every frame in play, on the game
 # thread, as picking an item up is) the runtime calls the pause menu data's item get for what was asked for. The item
 # get takes the item's name as a sead::SafeString; its vtable is the one the item get itself loads (`adrp x26` /
@@ -1311,6 +1351,10 @@ PATCHES = {
     'battle_info_c': _battle_info(2),
     'horse_crash': _horse_crash,
     'horse_look_ahead': _horse_look_ahead,
+    'drop_rolls': _drop_rolls,
+    'drop_roll': _drop_roll,
+    'drop_single_a': _drop_single,
+    'drop_single_b': _drop_single,
     'item_tick': _item_tick,
 }
 

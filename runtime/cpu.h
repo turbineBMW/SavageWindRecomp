@@ -317,6 +317,21 @@ static inline void rt_fsub_s(Cpu *c, int d, int n, int m) {
 #endif
 }
 
+// Scalar single FMUL for a patch (tools/patches.py _drop_roll), the same way as rt_fsub_s.
+static inline void rt_fmul_s(Cpu *c, int d, int n, int m) {
+#if !defined(__cplusplus) && !defined(__aarch64__)
+    fp_op_s(c, FOP_MUL, d, n, m);
+#else
+    uint32_t au = (uint32_t)c->v[n], bu = (uint32_t)c->v[m], ru;
+    float a, b, r;
+    __builtin_memcpy(&a, &au, 4);
+    __builtin_memcpy(&b, &bu, 4);
+    r = a * b;
+    __builtin_memcpy(&ru, &r, 4);
+    c->v[d] = ru;
+#endif
+}
+
 // Scalar single float from a vector register for a patch (tools/patches.py _grass_blade_lateral), whichever
 // way the SIMD was lifted.
 static inline float rt_vf32(const Cpu *c, int n) {
