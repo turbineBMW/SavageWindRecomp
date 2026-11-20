@@ -81,6 +81,7 @@ game is shipped with Savage Wind.
 | Set rupees | Sets your wallet to an exact number (0 to 999999). Turn off Infinite rupees first. |
 | God mode, Infinite stamina, One-hit kill, Infinite arrows, Weapon wear, Damage taken, Damage dealt | The same settings as the [Assists](#assists): changing one here changes it there too. |
 | Set hearts | Sets your heart containers to an exact number (3 to 30). It is written into your save. |
+| Reveal all shrines | Puts every shrine you haven't found on the map, orange, as when you see one yourself. You still have to reach each one and step on its entrance before you can travel to it. The 16 shrines of The Champions' Ballad are left out: they rise from the ground during its quest. So is Jee Noh Shrine: only the game's own event can mark it. It is written into your save and can't be undone. |
 | Time of day | Sets the game's clock to an hour. The day goes on from there. |
 | Freeze time | Stops the clock at the hour it is. Off: the day goes on. |
 | Blood moon now | The game's own blood moon: its cutscene plays, and the monsters and materials come back as after any blood moon. It starts once you close the menu, in the open world only. |
@@ -108,6 +109,7 @@ The teleport and a few more cheats are console commands for developers. To use t
 | `pos` | Shows where Link is and copies a line you can give to `tp` later to come back. |
 | `give <name> [count]` | Puts an item in the pouch, the same as the Cheats tab: `give arrow 20`. With several matches it lists them. |
 | `time <0-24>` | Sets the hour of the day. `time freeze` stops the clock and `time unfreeze` starts it again. |
+| `shrines reveal` | The same as Reveal all shrines in the Cheats tab. `shrines` alone says how many the last reveal put on the map. |
 | `bloodmoon` | The game's own blood moon, as Cheats > Blood moon now. It starts once you close the console. |
 | `help` | Lists every command. |
 

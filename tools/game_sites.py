@@ -407,6 +407,12 @@ SITES = [
     Site('pouch_mgr', 'got', '90000017/9f00001f aa0003f5 f94002f7/ffc003ff 910003e0 f94002f6 94000000/fc000000 2a0003e2 '
          'aa1603e0', 2),
     # Generic layout draw thunk and its native eligibility checks (runtime/ui_layout.c).
+    # the game data manager's flag setter, ksys::gdt::Manager::setS32(value, name) (called here for CurrentRupee), and
+    # where the manager's address is (runtime/rupees.c rt_shrines_tick: Cheats > Reveal all shrines)
+    Site('gdt_set_s32', 'call', '94000000/fc000000 f9401268 b9400100 7100041f 5400000b/ff00001f 94000000/fc000000 '
+         'a9424ff4 a9417bfd', 0),
+    Site('gdt_mgr', 'got', '90000008/9f00001f aa0003f3 f9400108/ffc003ff f9400114 94000000/fc000000 f9401268 '
+         '90000009/9f00001f 910003e2', 2),
     Site('ui_layout_draw', 'code', '14000000/fc000000 f9013001 b4000001/ff00001f d10403ff a90a7bfd a90b6ffc a90c67fa a90d5ff8', 0),
     Site('ui_layout_native', 'code', '39440008 7100011f 39440809 3943f80a 3943fc0b 7a401920 7a400944 7a421964', 0),
     Site('ui_layout_pane', 'code', '39416008 52801029 6a28013f 54000001/ff00001f a9bd7bfd a90157f6 a9024ff4 910003fd', 0),
@@ -524,6 +530,7 @@ OPTIONAL_GROUPS = [
     ('drop_rolls', 'drop_roll', 'drop_pick', 'drop_single_a', 'drop_single_b'),
     ('tp_gate',),  # (a far teleport of the control endpoint: without it a long jump freezes the world)
     ('item_tick', 'pouch_item_get', 'pouch_mgr'),
+    ('gdt_set_s32', 'gdt_mgr'),  # (Cheats > Reveal all shrines: without them it does nothing)
     ('horse_cam_lr',),
 ]
 OPTIONAL = {n for g in OPTIONAL_GROUPS for n in g}
@@ -753,6 +760,8 @@ KNOWN = {
         'item_tick': 0x7000cc4c3c,
         'pouch_item_get': 0x7000d921bc,
         'pouch_mgr': 0x7001e18570,
+        'gdt_set_s32': 0x700112dd68,
+        'gdt_mgr': 0x7001e3b188,
         'main_data': 0x7001b7a000,
         'main_end': 0x7001e98000,
     },

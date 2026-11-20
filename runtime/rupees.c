@@ -1,6 +1,7 @@
-// Cheats: Infinite rupees (the wallet kept at 9999, from the Savage Wind overlay's Cheats tab or `rupees lock`) and
-// `rupees <n>` (the wallet set once). No patch in the game code: a thread of ours finds the rupee count's game data
-// flag in the game's memory and writes it: a set at once, the top-up every RUPEE_POLL_MS while the cheat is on.
+// Cheats: Infinite rupees (the wallet kept at 9999, from the Savage Wind overlay's Cheats tab or `rupees lock`),
+// `rupees <n>` (the wallet set once), `hearts <n>` and Reveal all shrines (`shrines reveal`). No patch in the game code
+// for the rupees: a thread of ours finds the rupee count's game data flag in the game's memory and writes it: a set at
+// once, the top-up every RUPEE_POLL_MS while the cheat is on. The shrines go through the game's own flag setter.
 //
 // The game keeps each game data flag as an object on its heap (ksys::gdt, made once as it starts): an s32 flag is
 // 0x28 bytes - +0 its class (vtable, in main), +0x18 its value, +0x1c the crc32 of its name (the save's hash). The
@@ -12,9 +13,11 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <zlib.h>
 
 #include "control.h"
 #include "cpu.h"
@@ -33,6 +36,9 @@
 #define HART_CUR_HASH 0xbe9bc993u  // crc32("CurrentHart")
 #define HEARTS_MIN 3
 #define HEARTS_MAX 30
+#define SHRINES 120                // the main game's shrines, Dungeon000-119 (the DLC's 120-135 rise in its quest)
+#define REVEAL_PER_FRAME 16        // setter calls a frame (all 111 in one frame: only the first 64 or so were kept)
+#define REVEAL_EVENT_ONLY 1        // Jee Noh Shrine: its Location_ flag is not IsProgramWritable (its own event's)
 
 static pthread_t thread;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -43,6 +49,10 @@ static int32_t last_seen = -1;         // the count the thread last read (-1: no
 static int32_t want_hearts = -1;       // `hearts <3-30>`: heart containers to write (-1: none); under lock
 static int32_t want_hearts_tick = -1;  // live hearts update for game thread (Cpu *c in rt_item_tick)
 static int32_t last_hearts = -1;       // heart containers last read (-1: not found yet)
+static bool want_reveal;               // Reveal all shrines asked; under lock
+static int32_t revealed = -1, reveal_had = -1;  // the last reveal: shrines put on the map, and those already there
+static uint8_t reveal_todo[SHRINES];   // the shrines rt_shrines_tick is to set (the thread's scan: still at 0)
+static int reveal_go;                  // (atomic) reveal_todo is ready for the game thread
 static uint64_t vt_s32, rupee_obj, hart_max_obj, hart_cur_obj;
 
 static uint32_t rd32(uint64_t a) { return *(volatile uint32_t *)(uintptr_t)a; }
@@ -82,13 +92,95 @@ static bool still_flag(uint64_t obj, uint32_t hash) {
            rd64(obj) == vt_s32 && rd32(obj + 0x1c) == hash;
 }
 
+// Reveal all shrines. A shrine's Location_DungeonNNN flag (s32) is 0 until Link finds it, then 1 (the discovery scene;
+// its icon on the map, orange), and more as he enters and clears it; its Open_DungeonNNN flag (bool), set by the
+// platform at its entrance, is what makes it a place to travel to. Each main shrine still at 0 is set to 1 through the
+// game's own setter (rt_shrines_tick), Open_ is left alone: the shrines show on the map as found, not activated.
+// (Writing the flag object alone changed neither the map nor the save: the game keeps the save's values apart, and
+// its setter updates both.) Here, one pass over the heap reads which shrines are still at 0. false: none found (no
+// game loaded yet).
+static bool reveal_scan(void) {
+    if (__atomic_load_n(&reveal_go, __ATOMIC_ACQUIRE)) return false;  // (the game thread is still at the last one)
+    uint32_t want_h[SHRINES];
+    for (int i = 0; i < SHRINES; i++) {
+        char n[32];
+        int len = snprintf(n, sizeof n, "Location_Dungeon%03d", i);
+        want_h[i] = (uint32_t)crc32(0, (const Bytef *)n, (uInt)len);
+    }
+    uint64_t lo = HEAP_BASE, hi = HEAP_BASE + kernel_heap_size();
+    if (hi <= lo) return false;
+    if (!vt_s32) vt_s32 = s32_class(lo, hi, S32_HASH);
+    if (!vt_s32) return false;
+    int found = 0, now = 0, had = 0;
+    uint64_t a, e;
+    for (uint64_t at = lo; !stopping() && plat_committed_range(at, hi, &a, &e); at = e)
+        for (uint64_t p = (a + 7) & ~7ull; p + 0x28 <= e; p += 8) {
+            if (rd64(p) != vt_s32) continue;
+            uint32_t h = rd32(p + 0x1c);
+            for (int i = 0; i < SHRINES; i++) {
+                if (h != want_h[i]) continue;
+                found++;
+                if (i == REVEAL_EVENT_ONLY) break;  // (the setter refuses it)
+                reveal_todo[i] = rd32(p + 0x18) == 0;
+                if (reveal_todo[i]) now++;
+                else had++;
+                break;
+            }
+        }
+    if (!found) return false;
+    LOG("[cheats] shrines: %d to put on the map, %d already there (%d flags)\n", now, had, found);
+    __atomic_store_n(&revealed, now, __ATOMIC_RELAXED);
+    __atomic_store_n(&reveal_had, had, __ATOMIC_RELAXED);
+    __atomic_store_n(&reveal_go, 1, __ATOMIC_RELEASE);
+    return true;
+}
+
+// The game thread, every frame in play (runtime/items.c rt_item_tick: the whole guest CPU state is put back after):
+// the shrines the scan found still at 0 set to 1 by ksys::gdt::Manager::setS32(value, name) (g_site.gdt_set_s32,
+// the manager at g_site.gdt_mgr), REVEAL_PER_FRAME a frame: the game keeps a frame's flag changes for the save in a
+// list of its own, and drops what doesn't fit. sstr_vt: sead::SafeString's vtable; the name and its SafeString go on
+// the guest stack.
+void rt_shrines_tick(Cpu *c, uint64_t sstr_vt) {
+    if (!__atomic_load_n(&reveal_go, __ATOMIC_ACQUIRE)) return;
+    uint64_t mgr = g_site.gdt_mgr ? rd64(g_site.gdt_mgr) : 0;
+    if (!mgr || !g_site.gdt_set_s32) { __atomic_store_n(&reveal_go, 0, __ATOMIC_RELAXED); return; }
+    Cpu *keep = malloc(sizeof *keep);
+    if (!keep) return;
+    memcpy(keep, c, sizeof *c);
+    uint64_t buf = (c->sp - 0x100) & ~15ull;
+    int set = 0, left = 0;
+    for (int i = 0; i < SHRINES; i++) {
+        if (!reveal_todo[i]) continue;
+        if (set == REVEAL_PER_FRAME) { left++; continue; }
+        reveal_todo[i] = 0;
+        snprintf((char *)(uintptr_t)(buf + 0x20), 32, "Location_Dungeon%03d", i);
+        *(uint64_t *)(uintptr_t)buf = sstr_vt;
+        *(uint64_t *)(uintptr_t)(buf + 8) = buf + 0x20;
+        c->sp = buf;
+        c->x[0] = mgr, c->x[1] = 1, c->x[2] = buf;
+        guest_call(c, g_site.gdt_set_s32);
+        set++;
+    }
+    memcpy(c, keep, sizeof *c);
+    free(keep);
+    if (!left) __atomic_store_n(&reveal_go, 0, __ATOMIC_RELAXED);
+    LOG("[cheats] shrines: %d set through the game's flag setter, %d for the next frames\n", set, left);
+}
+
+// In a loaded game: Link's PlayerInfo is there (before, at the title, the save's flags are not loaded yet)
+static bool in_game(void) {
+    return kernel_heap_size() && g_site.player_info && *(volatile uint64_t *)(uintptr_t)g_site.player_info;
+}
+
 static void *rupee_thread(void *arg) {
     (void)arg;
     pthread_mutex_lock(&lock);
     while (!stop_req) {
         int32_t set = want;
         int32_t set_h = want_hearts;
+        bool reveal = want_reveal;
         pthread_mutex_unlock(&lock);
+        bool reveal_done = reveal && in_game() && reveal_scan();
         bool look_rupees = (g_settings.infinite_rupees || set >= 0) && kernel_heap_size();
         bool look_hearts = (set_h >= HEARTS_MIN) && kernel_heap_size();
         if (look_rupees && !still_flag(rupee_obj, RUPEE_HASH)) {
@@ -124,6 +216,7 @@ static void *rupee_thread(void *arg) {
         pthread_mutex_lock(&lock);
         if (set >= 0 && want == set && rupee_obj) want = -1;  // (written; not found yet: tried again at the next poll)
         if (set_h >= HEARTS_MIN && want_hearts == set_h && (hart_max_obj || hart_cur_obj || g_site.player_info)) want_hearts = -1;
+        if (reveal_done) want_reveal = false;  // (no flags found: tried again at the next poll)
         struct timespec until;
         clock_gettime(CLOCK_REALTIME, &until);
         long long ns = until.tv_nsec + RUPEE_POLL_MS * 1000000LL;
@@ -204,13 +297,31 @@ static void cmd_hearts(int argc, char **argv, ControlReply *r) {
     else control_text(r, "Hearts: not read yet (hearts <%d-%d> finds it)", HEARTS_MIN, HEARTS_MAX);
 }
 
+bool shrines_reveal(void);
+
+// shrines: what the last reveal did | reveal: put every main shrine not found yet on the map (Reveal all shrines)
+static void cmd_shrines(int argc, char **argv, ControlReply *r) {
+    if (argc > 2 || (argc == 2 && strcmp(argv[1], "reveal"))) { control_fail(r, "shrines: use shrines or shrines reveal"); return; }
+    if (argc == 2) {
+        if (!shrines_reveal()) { control_fail(r, "Load your game first"); return; }
+        control_text(r, "Putting the shrines not found yet on the map (the first time, finding them takes a few seconds)");
+        return;
+    }
+    int32_t now = __atomic_load_n(&revealed, __ATOMIC_RELAXED), had = __atomic_load_n(&reveal_had, __ATOMIC_RELAXED);
+    if (now < 0) { control_text(r, "No shrines revealed yet (shrines reveal)"); return; }
+    control_field_int(r, "revealed", now);
+    control_field_int(r, "already", had);
+    control_text(r, "Last reveal: %d shrines put on the map, %d were already there", (int)now, (int)had);
+}
+
 // (runtime/control_game.c: developer mode only - it writes the game's memory)
 void rupees_control_init(void) {
     static const ControlCmd cmds[] = {
         {"rupees", "[<0-999999> | lock | unlock]", "Cheat: show, set or lock the rupee count", cmd_rupees, 0},
         {"hearts", "[<3-30>]", "Cheat: show or set the heart containers count", cmd_hearts, 0},
+        {"shrines", "[reveal]", "Cheat: put every shrine not found yet on the map (not as a travel point)", cmd_shrines, 0},
     };
-    control_register(cmds, 2);
+    control_register(cmds, 3);
 }
 
 // Set the rupee wallet once from the UI (false if the game isn't running or count is out of range)
@@ -218,6 +329,16 @@ bool rupees_set(int32_t count) {
     if (!running || !kernel_heap_size() || count < 0 || count > RUPEE_SET_MAX) return false;
     pthread_mutex_lock(&lock);
     want = count;
+    pthread_mutex_unlock(&lock);
+    poke();
+    return true;
+}
+
+// Reveal all shrines from the UI (false if no game is loaded); done on the thread within a few seconds
+bool shrines_reveal(void) {
+    if (!running || !in_game() || !g_site.gdt_set_s32 || !g_site.gdt_mgr) return false;
+    pthread_mutex_lock(&lock);
+    want_reveal = true;
     pthread_mutex_unlock(&lock);
     poke();
     return true;

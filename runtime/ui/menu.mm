@@ -1384,6 +1384,7 @@ static void tab_audio(void) {
 // console's `time` (runtime/services/test_warp.c), the blood moon its `bloodmoon` (runtime/blood_moon.c).
 extern "C" bool rupees_set(int32_t count);
 extern "C" bool hearts_set(int32_t count);
+extern "C" bool shrines_reveal(void);
 extern "C" void test_warp_set_hour(float hour);
 extern "C" void test_warp_hold_hour(float hour);
 extern "C" float test_warp_hour(bool *held);
@@ -1449,6 +1450,14 @@ static void cheats_options(void) {
             } else
                 heart_buf[0] = 0;
         }
+    }
+    {   // Reveal all shrines (runtime/rupees.c shrines_reveal): found on the map, not travel points
+        static int told;  // 1: done, 2: no game loaded
+        if (opt_button("Reveal all shrines", "Puts every shrine you haven't found on the map, as if you had seen it. You "
+                                             "still have to reach each one and step on its entrance before you can "
+                                             "travel to it. Saved with your game: it can't be undone."))
+            told = shrines_reveal() ? 1 : 2;
+        if (told) hint(told == 1 ? "The shrines are on your map." : "Load your game first.");
     }
     static const char *const weather[WEATHER_COUNT] = {"Automatic", "No rain", "No thunderstorms", "Clear", "Cloudy",
                                                        "Rain", "Heavy rain", "Snow", "Heavy snow", "Thunderstorm",

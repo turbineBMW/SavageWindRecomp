@@ -28,6 +28,8 @@
     X(frame_loop_interval_ret) /* the frame loop's return address from setting the present interval */                \
     X(title_version_format)    /* "Ver.%s": the title screen's version line */                                         \
     X(player_info)             /* uking::act::PlayerInfo * (test tools) */                                              \
+    X(gdt_set_s32)             /* ksys::gdt::Manager::setS32(this, value, const sead::SafeString &name) */           \
+    X(gdt_mgr)                 /* where ksys::gdt::Manager * is (Reveal all shrines: runtime/rupees.c) */           \
     X(world_mgr)               /* ksys::world::Manager * (test tools, weather.c)*/                                                \
     X(main_data)               /* main's .data (then .bss, up to main_end) */                                           \
     X(main_end)
