@@ -627,6 +627,7 @@ void settings_load(void) {
         }
         else if (!strcmp(key, "infinite_stamina")) g_settings.infinite_stamina = atoi(val) != 0;
         else if (!strcmp(key, "infinite_rupees")) g_settings.infinite_rupees = atoi(val) != 0;
+        else if (!strcmp(key, "korok_radar")) g_settings.korok_radar = atoi(val) != 0;
         else if (!strcmp(key, "item_multiplier")) g_settings.item_multiplier = atoi(val);
         else if (!strcmp(key, "free_sprint")) g_settings.free_sprint = atoi(val) != 0;
         else if (!strcmp(key, "sure_footed")) g_settings.sure_footed = atoi(val) != 0;
@@ -914,6 +915,7 @@ bool settings_save_to(const char *path) {
     fprintf(f, "infinite_arrows = %d\n", g_settings.infinite_arrows);
     fprintf(f, "infinite_stamina = %d\n", g_settings.infinite_stamina);
     fprintf(f, "infinite_rupees = %d\n", g_settings.infinite_rupees);
+    fprintf(f, "korok_radar = %d\n", g_settings.korok_radar);
     fprintf(f, "item_multiplier = %d\n", g_settings.item_multiplier);
     fprintf(f, "free_sprint = %d\n", g_settings.free_sprint);
     fprintf(f, "sure_footed = %d\n", g_settings.sure_footed);

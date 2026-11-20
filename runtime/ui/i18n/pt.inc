@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Define seus recip
 T("Reveal all shrines", "Revelar todos os santuários")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Coloca no mapa todos os santuários que você ainda não encontrou, como se os tivesse visto. Você ainda precisa chegar a cada um e pisar na entrada antes de poder viajar até ele. Salvo com o seu jogo: não pode ser desfeito.")
 T("The shrines are on your map.", "Os santuários estão no seu mapa.")
+T("Korok radar", "Radar de Koroks")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Mostra os Koroks que você ainda não encontrou a até 200 m num pequeno radar no canto inferior esquerdo, girado para onde a câmera olha. Um anel na borda aponta para o mais próximo que estiver mais longe. Não muda nada no seu jogo.")
 T("Load your game first.", "Carregue o seu jogo primeiro.")
 T("Cheats", "Trapaças")
 T("Weather", "Clima")

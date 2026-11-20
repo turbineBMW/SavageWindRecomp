@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Imposta i tuoi po
 T("Reveal all shrines", "Rivela tutti i sacrari")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Mostra sulla mappa ogni sacrario che non hai ancora trovato, come se l'avessi visto. Devi comunque raggiungerli uno per uno e salire sul loro ingresso prima di poterti teletrasportare. Salvato con la partita: non si può annullare.")
 T("The shrines are on your map.", "I sacrari sono sulla tua mappa.")
+T("Korok radar", "Radar dei Korogu")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Mostra i Korogu che non hai ancora trovato entro 200 m su un piccolo radar nell'angolo in basso a sinistra, orientato come la telecamera. Un anello sul bordo indica il più vicino oltre quella distanza. Non cambia nulla nella tua partita.")
 T("Load your game first.", "Prima carica la tua partita.")
 T("Cheats", "Trucchi")
 T("Weather", "Meteo")

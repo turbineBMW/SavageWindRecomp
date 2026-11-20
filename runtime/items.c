@@ -420,6 +420,7 @@ uint32_t rt_item_get_scale(uint64_t safe_str, uint32_t value) {
 void rt_item_tick(Cpu *c, uint64_t get, uint64_t mgr, uint64_t sstr_vt) {
     { extern void rt_hearts_tick(Cpu *c); rt_hearts_tick(c); }
     { extern void rt_shrines_tick(Cpu *c, uint64_t sstr_vt); rt_shrines_tick(c, sstr_vt); }  // (rupees.c)
+    { extern void korok_radar_play_tick(void); korok_radar_play_tick(); }  // (runtime/korok_radar.c: in play)
     if (!atomic_load_explicit(&g_pending, memory_order_relaxed)) return;
     Request req[32];
     pthread_mutex_lock(&g_req_lock);

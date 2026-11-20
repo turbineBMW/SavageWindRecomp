@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "ハートの器�
 T("Reveal all shrines", "すべての祠を表示")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "まだ見つけていない祠をすべて、見つけたことにしてマップに表示します。ワープできるようになるには、これまでどおり各祠まで行って入口に乗る必要があります。セーブデータに保存され、元に戻せません。")
 T("The shrines are on your map.", "祠がマップに表示されました。")
+T("Korok radar", "コログレーダー")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "まだ見つけていない半径200 m以内のコログを、左下の小さなレーダーにカメラの向きに合わせて表示します。それより遠い場合は、縁のリングが最も近いコログの方向を示します。ゲームには何も変更を加えません。")
 T("Load your game first.", "先にゲームをロードしてください。")
 T("Cheats", "チート")
 T("Weather", "天気")

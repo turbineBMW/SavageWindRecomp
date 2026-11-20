@@ -529,6 +529,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Establece tus con
 T("Reveal all shrines", "Revelar todos los santuarios")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Pone en el mapa todos los santuarios que no has encontrado, como si los hubieras visto. Aún tienes que llegar a cada uno y pisar su entrada antes de poder viajar a él. Se guarda con tu partida: no se puede deshacer.")
 T("The shrines are on your map.", "Los santuarios están en tu mapa.")
+T("Korok radar", "Radar de kologs")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Muestra los kologs que aún no has encontrado a menos de 200 m en un pequeño radar en la esquina inferior izquierda, orientado hacia donde mira la cámara. Un anillo en el borde señala el más cercano que esté más lejos. No cambia nada en tu partida.")
 T("Load your game first.", "Carga primero tu partida.")
 T("Cheats", "Trucos")
 T("Weather", "Clima")

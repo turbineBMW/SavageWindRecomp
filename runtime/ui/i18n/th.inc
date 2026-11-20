@@ -245,6 +245,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "กำหนด�
 T("Reveal all shrines", "แสดงศาลเจ้าทั้งหมด")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "แสดงศาลเจ้าทุกแห่งที่คุณยังไม่พบบนแผนที่ เหมือนกับว่าคุณเคยเห็นแล้ว คุณยังต้องไปถึงแต่ละแห่งและเหยียบทางเข้าก่อนจึงจะวาร์ปไปได้ บันทึกไปกับเกม: ย้อนกลับไม่ได้")
 T("The shrines are on your map.", "ศาลเจ้าแสดงบนแผนที่ของคุณแล้ว")
+T("Korok radar", "เรดาร์โคร็อก")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "แสดงโคร็อกที่คุณยังไม่พบในระยะ 200 ม. บนเรดาร์เล็ก ๆ ที่มุมซ้ายล่าง หมุนตามทิศที่กล้องหัน วงแหวนที่ขอบจะชี้ไปยังตัวที่ใกล้ที่สุดซึ่งอยู่ไกลกว่านั้น ไม่มีการเปลี่ยนแปลงใด ๆ ในเกมของคุณ")
 T("Load your game first.", "โหลดเกมของคุณก่อน")
 T("Cheats", "สูตรโกง")
 T("Weather", "สภาพอากาศ")

@@ -14,6 +14,9 @@ void game_place_on_read(const char *path);
 // The two lines for what the player is doing now; false: nothing new to say (no Link while loading: the last text stays)
 bool game_place_text(float x, float z, bool has_link, char *details, size_t details_size, char *state, size_t state_size);
 
+// Inside a shrine, a Divine Beast or another interior (its own map, its own coordinates): the last stage read was one
+bool game_place_inside(void);
+
 // On the main field: the name that holds at x, z and the tower region (NULL: none)
 const char *game_place_name(float x, float z);
 const char *game_place_region(float x, float z);

@@ -186,6 +186,7 @@ static void boot(const char *root) {
     kernel_init();
     dispatch_init();
     { extern void rupees_start(void); rupees_start(); }  // (Cheats > Infinite rupees, `rupees`: runtime/rupees.c)
+    { extern void korok_radar_start(void); korok_radar_start(); }  // (Cheats > Korok radar: runtime/korok_radar.c)
     { extern void jpeg_debug_init(void); jpeg_debug_init(); }
 
     uint32_t stack_size = 0x100000;

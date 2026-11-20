@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Устанавл�
 T("Reveal all shrines", "Открыть все святилища")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Отмечает на карте все святилища, которые вы ещё не нашли, как будто вы их видели. Чтобы перемещаться к ним, всё равно нужно добраться до каждого и встать на его вход. Сохраняется вместе с игрой: отменить нельзя.")
 T("The shrines are on your map.", "Святилища отмечены на карте.")
+T("Korok radar", "Радар короков")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Показывает ещё не найденных короков в радиусе 200 м на маленьком радаре в левом нижнем углу, повёрнутом по направлению камеры. Кольцо на краю указывает на ближайшего, если он дальше. В вашей игре ничего не меняется.")
 T("Load your game first.", "Сначала загрузите игру.")
 T("Cheats", "Читы")
 T("Weather", "Погода")

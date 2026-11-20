@@ -55,6 +55,8 @@ void game_place_on_read(const char *path) {
         }
 }
 
+bool game_place_inside(void) { return atomic_load(&stage) >= 0; }
+
 const char *game_place_name(float x, float z) {
     const char *best = NULL;
     float best_score = 1;  // (a town scores below 0: inside one, its name wins)

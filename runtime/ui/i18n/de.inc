@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Setzt deine Herzc
 T("Reveal all shrines", "Alle Schreine aufdecken")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Zeigt jeden Schrein, den du noch nicht gefunden hast, auf der Karte, als hättest du ihn gesehen. Du musst trotzdem jeden erreichen und seinen Eingang betreten, bevor du dorthin reisen kannst. Wird mit deinem Spiel gespeichert: Das lässt sich nicht rückgängig machen.")
 T("The shrines are on your map.", "Die Schreine sind auf deiner Karte.")
+T("Korok radar", "Krog-Radar")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Zeigt die Krogs, die du noch nicht gefunden hast, im Umkreis von 200 m auf einem kleinen Radar unten links, ausgerichtet nach der Kamera. Ein Ring am Rand zeigt zum nächsten weiter entfernten. An deinem Spiel ändert sich nichts.")
 T("Load your game first.", "Lade zuerst dein Spiel.")
 T("Cheats", "Cheats")
 T("Weather", "Wetter")

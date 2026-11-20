@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "하트의 그릇�
 T("Reveal all shrines", "모든 사당 표시")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "아직 찾지 못한 모든 사당을 본 것처럼 지도에 표시합니다. 워프하려면 여전히 각 사당까지 가서 입구에 올라서야 합니다. 게임과 함께 저장되며 되돌릴 수 없습니다.")
 T("The shrines are on your map.", "사당이 지도에 표시되었습니다.")
+T("Korok radar", "코로그 레이더")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "아직 찾지 못한 200 m 이내의 코로그를 왼쪽 아래의 작은 레이더에 카메라 방향에 맞춰 표시합니다. 더 멀리 있으면 가장자리의 고리가 가장 가까운 코로그를 가리킵니다. 게임에는 아무것도 바꾸지 않습니다.")
 T("Load your game first.", "먼저 게임을 불러오세요.")
 T("Cheats", "치트")
 T("Weather", "날씨")

@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Définit vos réc
 T("Reveal all shrines", "Révéler tous les sanctuaires")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Place sur la carte chaque sanctuaire que vous n'avez pas trouvé, comme si vous l'aviez vu. Vous devez quand même atteindre chacun et marcher sur son entrée avant de pouvoir vous y téléporter. Enregistré avec votre partie : impossible à annuler.")
 T("The shrines are on your map.", "Les sanctuaires sont sur votre carte.")
+T("Korok radar", "Radar à Korogus")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Affiche les Korogus que vous n'avez pas encore trouvés dans un rayon de 200 m sur un petit radar en bas à gauche, orienté selon la caméra. Un anneau sur le bord indique le plus proche au-delà. Rien n'est modifié dans votre partie.")
 T("Load your game first.", "Chargez d'abord votre partie.")
 T("Cheats", "Triches")
 T("Weather", "Météo")

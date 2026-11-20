@@ -695,6 +695,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "קובע את מ�
 T("Reveal all shrines", "חשיפת כל המקדשים")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "מציג על המפה כל מקדש שעוד לא מצאת, כאילו ראית אותו. עדיין צריך להגיע לכל אחד ולעלות על הכניסה שלו לפני שאפשר לטוס אליו. נשמר עם המשחק: אי אפשר לבטל.")
 T("The shrines are on your map.", "המקדשים מופיעים במפה שלך.")
+T("Korok radar", "מכ\"ם קורוקים")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "מציג את הקורוקים שעדיין לא מצאת בטווח של 200 מ' במכ\"ם קטן בפינה השמאלית התחתונה, מסובב לכיוון שאליו המצלמה פונה. טבעת בשוליו מצביעה אל הקרוב ביותר שנמצא רחוק יותר. הוא לא משנה דבר במשחק שלך.")
 T("Load your game first.", "קודם טען את המשחק שלך.")
 T("Cheats", "צ'יטים")
 T("Weather", "מזג אוויר")

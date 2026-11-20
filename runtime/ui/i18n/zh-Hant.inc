@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "將你的心之�
 T("Reveal all shrines", "顯示所有神廟")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "把你還沒找到的每座神廟都顯示在地圖上，就像你已經看過一樣。你仍需親自到達每座神廟並踏上入口，才能傳送到那裡。隨存檔儲存：無法復原。")
 T("The shrines are on your map.", "神廟已顯示在你的地圖上。")
+T("Korok radar", "克洛格雷達")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "在左下角的小雷達上顯示 200 公尺內你還沒找到的克洛格，方向隨鏡頭轉動。若都在更遠處，邊緣的圓環會指向最近的那個。不會改變你遊戲中的任何內容。")
 T("Load your game first.", "請先讀取你的存檔。")
 T("Cheats", "作弊")
 T("Weather", "天氣")

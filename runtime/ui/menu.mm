@@ -38,6 +38,7 @@ extern "C" {
 #include "../control_places.h"
 #include "../hle.h"
 #include "../items.h"
+#include "../korok_radar.h"
 #include "../settings.h"
 #include "../gamelib.h"
 #include "../quick_inventory_sort.h"
@@ -1459,6 +1460,10 @@ static void cheats_options(void) {
             told = shrines_reveal() ? 1 : 2;
         if (told) hint(told == 1 ? "The shrines are on your map." : "Load your game first.");
     }
+    opt_toggle("Korok radar", &g_settings.korok_radar, false,
+               "Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned "
+               "the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing "
+               "in your game.");
     static const char *const weather[WEATHER_COUNT] = {"Automatic", "No rain", "No thunderstorms", "Clear", "Cloudy",
                                                        "Rain", "Heavy rain", "Snow", "Heavy snow", "Thunderstorm",
                                                        "Thunder rain", "Rain in sunshine"};  // (settings.h weather)
@@ -1924,6 +1929,51 @@ static void perf_cell(const char *fmt, float v) {
     if (v < 0) ImGui::TextDisabled("-");
     else ImGui::Text(fmt, v);
 }
+// ------------------------------------------------------------------ Korok radar (runtime/korok_radar.c)
+// Cheats > Korok radar: a disc in the bottom-left corner (the game's HUD keeps that one free), Link in the middle and
+// up the way the camera looks; a seed for each Korok not found yet within KOROK_RANGE metres, with a small arrow when
+// it is well above or below him; a ring on the edge towards the nearest one when none is that close; its distance
+// under the disc. Sized for the game's 720-line HUD.
+#define KOROK_RANGE 200.0f
+#define KOROK_HEIGHT 6.0f  // metres above or below Link that get an arrow
+static void korok_radar_draw(ImGuiIO &io) {
+    KorokBlip blips[64], nearest;
+    int found, total, n = korok_radar_blips(KOROK_RANGE, blips, 64, &nearest, &found, &total);
+    if (n < 0) return;
+    ImDrawList *dl = ImGui::GetForegroundDrawList();
+    float s = io.DisplaySize.y / 720.0f, r = 52 * s, margin = 26 * s, fs = 15 * s;
+    ImVec2 c(margin + r, io.DisplaySize.y - margin - fs - 4 * s - r);
+    const ImU32 line = IM_COL32(236, 232, 214, 170), seed = IM_COL32(246, 196, 64, 255), dark = IM_COL32(20, 22, 16, 200);
+    dl->AddCircleFilled(c, r, IM_COL32(12, 16, 12, 150), 64);
+    dl->AddCircle(c, r, line, 64, 1.5f * s);
+    dl->AddCircle(c, r * 0.5f, IM_COL32(236, 232, 214, 60), 48, 1.0f * s);
+    dl->AddTriangleFilled(ImVec2(c.x, c.y - 6 * s), ImVec2(c.x - 4.5f * s, c.y + 4.5f * s), ImVec2(c.x + 4.5f * s, c.y + 4.5f * s),
+                          IM_COL32(250, 250, 240, 255));
+    float k = r / KOROK_RANGE;
+    for (int i = 0; i < n; i++) {
+        ImVec2 p(c.x + blips[i].right * k, c.y - blips[i].ahead * k);
+        dl->AddCircleFilled(p, 3.6f * s, dark, 12);
+        dl->AddCircleFilled(p, 2.8f * s, seed, 12);
+        float h = 3.2f * s;
+        if (blips[i].up > KOROK_HEIGHT)
+            dl->AddTriangleFilled(ImVec2(p.x, p.y - 5 * s - h), ImVec2(p.x - h, p.y - 5 * s), ImVec2(p.x + h, p.y - 5 * s), seed);
+        else if (blips[i].up < -KOROK_HEIGHT)
+            dl->AddTriangleFilled(ImVec2(p.x, p.y + 5 * s + h), ImVec2(p.x - h, p.y + 5 * s), ImVec2(p.x + h, p.y + 5 * s), seed);
+    }
+    if (nearest.dist > KOROK_RANGE) {
+        float d = sqrtf(nearest.right * nearest.right + nearest.ahead * nearest.ahead);
+        ImVec2 p(c.x + nearest.right / d * r, c.y - nearest.ahead / d * r);
+        dl->AddCircle(p, 4.5f * s, seed, 16, 2.0f * s);
+    }
+    char text[32];
+    if (nearest.dist >= 0) snprintf(text, sizeof text, "%.0f m", nearest.dist);
+    else snprintf(text, sizeof text, "%d / %d", found, total);
+    ImVec2 ts = g_font->CalcTextSizeA(fs, FLT_MAX, 0, text);
+    ImVec2 at(c.x - ts.x * 0.5f, c.y + r + 4 * s);
+    dl->AddText(g_font, fs, ImVec2(at.x + s, at.y + s), IM_COL32(0, 0, 0, 160), text);
+    dl->AddText(g_font, fs, at, IM_COL32(246, 240, 220, 240), text);
+}
+
 // ------------------------------------------------------------------ photo mode (hle/freecam.c, hle/photo.c)
 // While the free camera is on: a strip at the bottom with its keys (or the controller's). A picture saved: a notice
 // with a thumbnail in the bottom-right corner for a few seconds. Neither is in the picture (that is the game image).
@@ -2501,7 +2551,8 @@ static bool menu_draws(bool *pointer_hover = NULL, float *pointer_box = NULL, bo
     if (pointer_hover) *pointer_hover = hover;
     if (gyro_show) *gyro_show = gyro_on;
     return g_open.load() || g_kbd.load() == 1 || g_sizes.load() || console_is_open() || gyro_on || hover ||
-           g_settings.perf_overlay != PERF_OFF || act_log_enabled() || quick_inventory_sort_hint() || quick_drop_hint_state();
+           g_settings.perf_overlay != PERF_OFF || act_log_enabled() || quick_inventory_sort_hint() || quick_drop_hint_state() ||
+           korok_radar_shown();
 }
 
 bool menu_render_needed(void) { return menu_draws(); }
@@ -2588,6 +2639,7 @@ void menu_render(void *cmd, uint32_t target_w, uint32_t target_h) {
     if (act_log_enabled()) act_overlay_draw(io, scale);
     if (!open && !kbd && !sizes && !con && (quick_inventory_sort_hint() || quick_drop_hint_state())) quick_inventory_hint_draw(io);
     if (!open && !kbd && !sizes && !con) photo_overlay_draw(io, scale);
+    if (!open && !kbd && !sizes && !con) korok_radar_draw(io);
     if (!open && !kbd && !sizes && !con && gyro_scene_show) gyro_scene_draw(io, scale, gyro_scene);
 
     if (open) {

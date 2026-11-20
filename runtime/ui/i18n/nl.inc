@@ -538,6 +538,8 @@ T("Sets your heart containers to an exact number (3 to 30).", "Stelt je hartcont
 T("Reveal all shrines", "Alle heiligdommen onthullen")
 T("Puts every shrine you haven't found on the map, as if you had seen it. You still have to reach each one and step on its entrance before you can travel to it. Saved with your game: it can't be undone.", "Zet elk heiligdom dat je nog niet hebt gevonden op de kaart, alsof je het hebt gezien. Je moet nog steeds naar elk heiligdom gaan en op de ingang stappen voordat je erheen kunt reizen. Wordt met je spel opgeslagen: dit kan niet ongedaan worden gemaakt.")
 T("The shrines are on your map.", "De heiligdommen staan op je kaart.")
+T("Korok radar", "Korok-radar")
+T("Shows the Koroks you haven't found yet within 200 m on a small radar in the bottom-left corner, turned the way the camera faces. A ring on its edge points to the nearest one further away. It changes nothing in your game.", "Toont de Koroks die je nog niet hebt gevonden binnen 200 m op een kleine radar linksonder, gedraaid naar waar de camera kijkt. Een ring aan de rand wijst naar de dichtstbijzijnde die verder weg is. Er verandert niets aan je spel.")
 T("Load your game first.", "Laad eerst je spel.")
 T("Cheats", "Cheats")
 T("Weather", "Weer")
